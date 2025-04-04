@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bird Spotter</title>
+    <!-- Add CSS and other head elements here -->
+</head>
+<body>
+    <header>
+        (TODO: base.html)
+        <a href="/">Home</a>
+        <div class="right">
+            <a href="/explore/">explore</a> |
+            <a href="/users/{{ logname }}/">{{ logname }}</a>
+        </div>
+    </header>
+
+    {% block content %}
+    <!-- Content will be overridden in child templates -->
+    {% endblock %}
+
+</body>
+</html>

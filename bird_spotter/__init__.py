@@ -19,6 +19,6 @@ app.config.from_envvar('BIRD_SPOTTER_SETTINGS', silent=True)
 # circular import, which is naughty, but Flask was designed that way.
 # (Reference http://flask.pocoo.org/docs/patterns/packages/)  We're
 # going to tell pylint and pycodestyle to ignore this coding style violation.
-# import bird_spotter.api  # noqa: E402  pylint: disable=wrong-import-position
+import bird_spotter.api  # noqa: E402  pylint: disable=wrong-import-position
 import bird_spotter.views  # noqa: E402  pylint: disable=wrong-import-position
 import bird_spotter.model  # noqa: E402  pylint: disable=wrong-import-position

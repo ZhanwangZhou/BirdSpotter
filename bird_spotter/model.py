@@ -33,3 +33,29 @@ def close_db(error):
     if db is not None:
         db.commit()
         db.close()
+
+
+def get_bird_by_sci_name(bird_sci_name, connection):
+    cursor = connection.cursor()
+    query = """SELECT * FROM Bird
+    WHERE bird_scientific_name = %s"""
+    cursor.execute(query, (bird_sci_name,))
+    result = cursor.fetchone()
+    result = {"bird_sci_name": result[0],
+              "bird_com_name": result[1],
+              "bird_description": result[2]}
+    cursor.close()
+    return result
+
+
+def get_birds_by_com_name(bird_com_name, connection):
+    cursor = connection.cursor()
+    query = """SELECT * FROM Bird
+    WHERE bird_common_name = %s"""
+    cursor.execute(query, (bird_com_name,))
+    results = cursor.fetchall()
+    results = [{"bird_sci_name": result[0],
+                "bird_com_name": result[1],
+                "bird_description": result[2]} for result in results]
+    cursor.close()
+    return results

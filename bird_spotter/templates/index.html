@@ -1,6 +1,18 @@
 {% block content %}
     <!DOCTYPE html>
     <html lang="en">
-    Hello world!{{ bird_name }}
+    Hello world!<br>
+    TODO: log in page<br>
+    <!-- Search Form -->
+        <form action="/search/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="search_by_sci"/>
+            <input type="text" name="text" required/>
+            <input type="submit" name="search" value="Search by Scientific Name"/>
+        </form>
+        <form action="/search/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="search_by_com"/>
+            <input type="text" name="text" required/>
+            <input type="submit" name="search" value="Search by Common Name (Not yet working)"/>
+        </form>
     </html>
 {% endblock %}
