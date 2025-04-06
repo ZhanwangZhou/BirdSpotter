@@ -40,6 +40,59 @@ def bird(bird_sci_name):
     context["logname"] = "Anteater"
     return flask.render_template("bird.html", **context)
 
+@bird_spotter.app.route('/api/events', methods=['GET'])
+def get_events():
+    connection = bird_spotter.model.get_db()
+    cursor = connection.cursor()
+
+    search = flask.request.args.get('search', default=None, type=str)
+
+    base_query = """
+        SELECT 
+            E.event_id,
+            E.user_id,
+            E.event_time,
+            E.longitude,
+            E.latitude,
+            E.Country,
+            E.State,
+            B.bird_common_name,
+            B.bird_scientific_name,
+            I.image_id
+        FROM Event E
+        JOIN Bird B ON E.bird_scientific_name = B.bird_scientific_name
+        LEFT JOIN Image I ON E.event_id = I.event_id
+    """
+
+    if search:
+        base_query += " WHERE B.bird_scientific_name LIKE %s"
+        cursor.execute(base_query, (f'%{search}%',))
+    else:
+        return "bird name not provided", 500
+
+    results = cursor.fetchall()
+    events = []
+    for row in results:
+        image_id = row[9]
+        image_url = f"/static/images/{image_id}.jpg" if image_id else ""
+
+        events.append({
+            "event_id": row[0],
+            "user_id": row[1],
+            "event_time": row[2].isoformat(),
+            "longitude": float(row[3]),
+            "latitude": float(row[4]),
+            "Country": row[5],
+            "State": row[6],
+            "bird_name": row[7],
+            "bird_scientific_name": row[8],
+            "image_url": image_url
+        })
+
+    cursor.close()
+    return flask.jsonify({"status": "success", "data": events}), 200
+
+
 @bird_spotter.app.route("/api/upload", methods=["POST"])
 def upload_bird_sighting():
     connection = bird_spotter.model.get_db()
