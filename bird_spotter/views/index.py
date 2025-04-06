@@ -35,7 +35,7 @@ def search():
     if response == {}:
         response = bird_spotter.model.get_bird_by_com_name(text, connection)
     if response == {}:
-        return flask.jsonify({'status': 'error', 'message': 'Not Found'}, 404)
+        return flask.jsonify({'status': 'error', 'message': 'Not Found'}), 404
     response = {
         'status': 'success',
         'data': [response]
