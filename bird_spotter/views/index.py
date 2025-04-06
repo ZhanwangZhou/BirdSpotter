@@ -188,7 +188,9 @@ def upload_bird_sighting():
     country = flask.request.form.get('country')
     state = flask.request.form.get('state')
 
-    user_id = 1 #TODO: get user_id from session or token
+    user_id = flask.request.form.get('user_id')
+    if not user_id:
+        user_id = 1  # Default user_id for testing
 
     file = flask.request.files.get("file")
     if not file:
