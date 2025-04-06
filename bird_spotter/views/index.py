@@ -92,6 +92,75 @@ def get_events():
     cursor.close()
     return flask.jsonify({"status": "success", "data": events}), 200
 
+@bird_spotter.app.route('/api/events/page', methods=['GET'])
+def get_events_paginated():
+    connection = bird_spotter.model.get_db()
+    cursor = connection.cursor()
+
+    page = flask.request.args.get('page', default=1, type=int)
+    page=max(page,1)
+    limit = flask.request.args.get('limit', default=10, type=int)
+    sort = flask.request.args.get('sort', default="event_time:desc", type=str)
+
+    offset = (page - 1) * limit
+
+    main_query = f"""
+        SELECT 
+            E.event_id,
+            E.user_id,
+            E.event_time,
+            E.longitude,
+            E.latitude,
+            E.Country,
+            E.State,
+            B.bird_common_name,
+            B.bird_scientific_name,
+            I.image_id
+        FROM Event E
+        JOIN Bird B ON E.bird_scientific_name = B.bird_scientific_name
+        LEFT JOIN Image I ON E.event_id = I.event_id
+        ORDER BY E.event_time DESC
+        LIMIT %s OFFSET %s
+    """
+    cursor.execute(main_query, (limit, offset))
+    results = cursor.fetchall()
+
+    events = []
+    for row in results:
+        image_id = row[9]
+        image_url = f"/static/images/{image_id}.jpg" if image_id else ""
+        events.append({
+            "event_id": row[0],
+            "user_id": row[1],
+            "event_time": row[2].isoformat(),
+            "longitude": float(row[3]),
+            "latitude": float(row[4]),
+            "country": row[5],
+            "state": row[6],
+            "bird_name": row[7],
+            "bird_scientific_name": row[8],
+            "image_url": image_url
+        })
+
+    cursor.execute("SELECT COUNT(*) FROM Event")
+    total_items = cursor.fetchone()[0]
+    total_pages = (total_items + limit - 1) // limit
+
+    cursor.close()
+
+    return flask.jsonify({
+        "status": "success",
+        "data": {
+            "events": events,
+            "pagination": {
+                "current_page": page,
+                "total_pages": total_pages,
+                "total_items": total_items,
+                "has_next": page < total_pages
+            }
+        }
+    }), 200
+
 
 @bird_spotter.app.route("/api/upload", methods=["POST"])
 def upload_bird_sighting():
