@@ -18,16 +18,18 @@ def show_index():
     return flask.render_template("index.html")
 
 
-@bird_spotter.app.route('/api/search/', methods=['GET'])
+@bird_spotter.app.route('/api/search', methods=['GET'])
 def search():
-    text = request.form.get('text')
+    text = flask.request.args.get('text', default='abc', type=str)
     connection = bird_spotter.model.get_db()
-    if 'text' == 'default':
+    print(text)
+    if text == 'default':
         response = bird_spotter.model.get_random_birds(10, connection)
         response = {
             'status': 'success',
             'data': response
         }
+        print(response)
         return flask.jsonify(response), 200
     response = bird_spotter.model.get_bird_by_sci_name(text, connection)
     if response == {}:

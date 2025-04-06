@@ -44,8 +44,8 @@ def get_random_birds(num, connection):
     cursor.execute(query, (num,))
     results = cursor.fetchall()
     results = [
-        {"bird_sci_name": result[0],
-         "bird_com_name": result[1],
+        {"bird_scientific_name": result[0],
+         "bird_common_name": result[1],
          "bird_description": result[2]} for result in results
     ]
     cursor.close()
@@ -61,8 +61,8 @@ def get_bird_by_sci_name(bird_sci_name, connection):
     if len(result) == 0:
         return {}
     result = result[0]
-    result = {"bird_sci_name": result[0],
-              "bird_com_name": result[1],
+    result = {"bird_scientific_name": result[0],
+              "bird_common_name": result[1],
               "bird_description": result[2]}
     cursor.close()
     return result
