@@ -89,7 +89,7 @@ def get_events():
     events = []
     for row in results:
         image_id = row[9]
-        image_url = f"/static/images/{image_id}.jpg" if image_id else ""
+        image_url = f"/api/images/{image_id}" if image_id else ""
 
         events.append({
             "event_id": row[0],
@@ -144,7 +144,7 @@ def get_events_paginated():
     events = []
     for row in results:
         image_id = row[9]
-        image_url = f"/static/images/{image_id}.jpg" if image_id else ""
+        image_url = f"/api/images/{image_id}" if image_id else ""
         events.append({
             "event_id": row[0],
             "user_id": row[1],
