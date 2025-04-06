@@ -6,7 +6,7 @@ URLs include:
 """
 import flask
 import bird_spotter
-from flask import request, redirect
+from flask import request, redirect, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import uuid
 import os
@@ -30,6 +30,18 @@ def search_bird():
         url = '/'
     return redirect(url)
 
+@bird_spotter.app.route('/api/images/<int:image_id>', methods=['GET'])
+def get_image(image_id):
+    image_folder = flask.current_app.config["UPLOAD_FOLDER"]
+    allowed_exts = flask.current_app.config.get("ALLOWED_EXTENSIONS", ['.jpg'])
+    
+    for ext in allowed_exts:
+        filename = f"{image_id}{ext}"
+        file_path = os.path.join(image_folder, filename)
+        if os.path.exists(file_path):
+            return send_from_directory(image_folder, filename)
+    
+    return jsonify({"message": "Image not found"}), 404
 
 @bird_spotter.app.route('/bird/<bird_sci_name>/')
 def bird(bird_sci_name):
