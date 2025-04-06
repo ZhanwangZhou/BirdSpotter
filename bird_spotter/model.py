@@ -35,12 +35,32 @@ def close_db(error):
         db.close()
 
 
+def get_random_birds(num, connection):
+    cursor = connection.cursor()
+    query = """SELECT * FROM Bird
+    ORDER BY RAND()
+    LIMIT %s
+    """
+    cursor.execute(query, (num,))
+    results = cursor.fetchall()
+    results = [
+        {"bird_sci_name": result[0],
+         "bird_com_name": result[1],
+         "bird_description": result[2]} for result in results
+    ]
+    cursor.close()
+    return results
+
+
 def get_bird_by_sci_name(bird_sci_name, connection):
     cursor = connection.cursor()
     query = """SELECT * FROM Bird
     WHERE bird_scientific_name = %s"""
     cursor.execute(query, (bird_sci_name,))
-    result = cursor.fetchone()
+    result = cursor.fetchall()
+    if len(result) == 0:
+        return {}
+    result = result[0]
     result = {"bird_sci_name": result[0],
               "bird_com_name": result[1],
               "bird_description": result[2]}
@@ -48,14 +68,17 @@ def get_bird_by_sci_name(bird_sci_name, connection):
     return result
 
 
-def get_birds_by_com_name(bird_com_name, connection):
+def get_bird_by_com_name(bird_com_name, connection):
     cursor = connection.cursor()
     query = """SELECT * FROM Bird
     WHERE bird_common_name = %s"""
     cursor.execute(query, (bird_com_name,))
-    results = cursor.fetchall()
-    results = [{"bird_sci_name": result[0],
-                "bird_com_name": result[1],
-                "bird_description": result[2]} for result in results]
+    result = cursor.fetchall()
+    if len(result) == 0:
+        return {}
+    result = result[0]
+    result = {"bird_scientific_name": result[0],
+              "bird_common_name": result[1],
+              "bird_description": result[2]}
     cursor.close()
-    return results
+    return result

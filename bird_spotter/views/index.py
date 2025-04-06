@@ -18,17 +18,28 @@ def show_index():
     return flask.render_template("index.html")
 
 
-@bird_spotter.app.route('/search/', methods=['POST'])
-def search_bird():
-    operation = request.form.get('operation')
+@bird_spotter.app.route('/api/search/', methods=['GET'])
+def search():
     text = request.form.get('text')
-    print(operation, text)
-    if operation == 'search_by_sci':
-        url = '/bird/' + text.replace(' ', '+') + '/'
-        print("**********", url)
-    else:
-        url = '/'
-    return redirect(url)
+    connection = bird_spotter.model.get_db()
+    if 'text' == 'default':
+        response = bird_spotter.model.get_random_birds(10, connection)
+        response = {
+            'status': 'success',
+            'data': response
+        }
+        return flask.jsonify(response), 200
+    response = bird_spotter.model.get_bird_by_sci_name(text, connection)
+    if response == {}:
+        response = bird_spotter.model.get_bird_by_com_name(text, connection)
+    if response == {}:
+        return flask.jsonify({'status': 'error', 'message': 'Not Found'}, 404)
+    response = {
+        'status': 'success',
+        'data': [response]
+    }
+    return flask.jsonify(response), 200
+
 
 @bird_spotter.app.route('/api/images/<int:image_id>', methods=['GET'])
 def get_image(image_id):
@@ -43,14 +54,6 @@ def get_image(image_id):
     
     return jsonify({"message": "Image not found"}), 404
 
-@bird_spotter.app.route('/bird/<bird_sci_name>/')
-def bird(bird_sci_name):
-    connection = bird_spotter.model.get_db()
-    context = bird_spotter.model.get_bird_by_sci_name(bird_sci_name.replace('+', ' '), connection)
-    # Corvus brachyrhynchos
-    # context = bird_spotter.model.get_birds_by_com_name("American crow", connection)[0]
-    context["logname"] = "Anteater"
-    return flask.render_template("bird.html", **context)
 
 @bird_spotter.app.route('/api/events', methods=['GET'])
 def get_events():
@@ -103,6 +106,7 @@ def get_events():
 
     cursor.close()
     return flask.jsonify({"status": "success", "data": events}), 200
+
 
 @bird_spotter.app.route('/api/events/page', methods=['GET'])
 def get_events_paginated():
@@ -212,7 +216,6 @@ def upload_bird_sighting():
         os.makedirs(image_folder, exist_ok=True)
         image_path = os.path.join(image_folder, filename)
         file.save(image_path)
-
 
         connection.commit()
         cursor.close()
